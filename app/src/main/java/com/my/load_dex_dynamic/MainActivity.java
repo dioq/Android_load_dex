@@ -60,11 +60,10 @@ public class MainActivity extends AppCompatActivity {
         DexClassLoader dexClassLoader = new DexClassLoader(dex_store_path, dex_parsed_path, null, getClassLoader());
         try {
             //该name就是dex_store_path路径下的dex文件里面的TestDexLoad这个类的包名+类名
-            Class clz = dexClassLoader.loadClass("com.my.myshell_dex.test.TestDexLoad");
-            Method dexRes = clz.getDeclaredMethod("getTestStr");
-            String str = (String) dexRes.invoke(clz.newInstance());
-            Toast.makeText(this, str, Toast.LENGTH_LONG)
-                    .show();
+            Class clz = dexClassLoader.loadClass("com.my.myshell_target.judge.JudgeInputStr");
+            Method dexRes = clz.getMethod("judgeSign", String.class);
+            String str = (String) dexRes.invoke(clz.newInstance(), "321");
+            Toast.makeText(this, str, Toast.LENGTH_LONG).show();
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
             e.printStackTrace();
         }
