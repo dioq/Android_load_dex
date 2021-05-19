@@ -2,6 +2,7 @@ package com.my.load_dex_dynamic;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -14,6 +15,12 @@ import java.lang.reflect.Method;
 import dalvik.system.DexClassLoader;
 
 public class MainActivity extends AppCompatActivity {
+
+    /*
+    1、可以用jdk 里的javac xxx.java 直接将java文件编译成xxx.class文件
+    2、用Android Sdk里的工具 将xxx.class文件编译成xxx.dex文件 D:\work_space\class1 里放的是xxx.class文件，而且文件目录结构要与xxx.class里的包名要一致
+    D:\Android\Sdk\build-tools\30.0.3\dx.bat --dex --output=D:\work_space\dex1\MyLogic.dex D:\work_space\class1
+    * */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         //1.待加载的dex文件路径，如果是外存路径，一定要加上读外存文件的权限,
         //2.解压后的dex存放位置，此位置一定要是可读写且仅该应用可读写
         //3.指向包含本地库(so)的文件夹路径，可以设为null
-        //4.父级类加载器，一般可以通过Context.getClassLoader获取到，也可以通过ClassLoader.getSystemClassLoader()取到。
+        //4.父级类加载器，一般可以通过context.getClassLoader()获取到，也可以通过ClassLoader.getSystemClassLoader()取到。
         DexClassLoader dexClassLoader = new DexClassLoader(dex_store_path, dex_parsed_path, null, getClassLoader());
         try {
             //该name就是dex_store_path路径下的dex文件里面的TestDexLoad这个类的包名+类名
