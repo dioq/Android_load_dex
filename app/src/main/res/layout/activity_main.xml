@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/textBloardId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="默认信息"
+        android:textColor="#F00"
+        android:textSize="25sp" />
+
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="load_dex_func"
-        android:text="load dex" />
+        android:onClick="normal_test"
+        android:text="正常测试" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="load_dex"
+        android:text="加载dex文件" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="load_dex2"
+        android:text="加载dex文件2" />
 
 </LinearLayout>

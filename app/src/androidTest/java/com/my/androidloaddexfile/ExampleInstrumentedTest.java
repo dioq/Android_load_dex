@@ -1,4 +1,4 @@
-package com.my.load_dex_dynamic;
+package com.my.androidloaddexfile;
 
 import android.content.Context;
 
@@ -21,7 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-
-        assertEquals("com.my.load_dex_dynamic", appContext.getPackageName());
+        assertEquals("com.my.androidloaddexfile", appContext.getPackageName());
     }
 }

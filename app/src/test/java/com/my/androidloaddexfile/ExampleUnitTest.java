@@ -1,4 +1,4 @@
-package com.my.load_dex_dynamic;
+package com.my.androidloaddexfile;
 
 import org.junit.Test;
 
