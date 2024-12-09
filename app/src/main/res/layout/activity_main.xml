@@ -12,6 +12,18 @@
         android:onClick="load_dex"
         android:text="加载dex文件" />
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="load_dex2"
+        android:text="加载dex文件(utils)" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="load_dex3"
+        android:text="加载dex文件(utils)和参数" />
+
     <TextView
         android:id="@+id/textBloardId"
         android:layout_width="match_parent"
