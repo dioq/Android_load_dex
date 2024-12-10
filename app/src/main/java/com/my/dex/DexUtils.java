@@ -3,10 +3,13 @@ package com.my.dex;
 import android.content.Context;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 import dalvik.system.DexClassLoader;
 
@@ -27,6 +30,58 @@ public class DexUtils {
     }
 
     private final String TAG = "dlog";
+    private final String config_dir = "/data/local/tmp/work/";
+
+    public void inject(Context context, String packageName) {
+        Log.d(TAG, "inject dex ...");
+        String dexPath = null;
+        String className = null;
+        String methodName = null;
+        Class<?>[] parameterTypes = null;
+        Object[] args = null;
+        try {
+            String config_path = config_dir + "config.json";
+            byte[] bytes = new FileUtils().readFile(config_path);
+            String json_str = new String(bytes);
+            JSONObject jsonRoot = new JSONObject(json_str);
+            Log.d(TAG, jsonRoot.toString());
+
+            JSONArray target_pkgname = jsonRoot.getJSONArray("target_pkgname");
+//            for (int i = 0; i < target_pkgname.length(); i++) {
+//                Log.d(TAG, target_pkgname.getString(i));
+//            }
+
+            boolean bool = target_pkgname.toString().contains(packageName);
+            if (!bool) {
+                return;
+            }
+            Log.d(TAG, packageName + " exist!");
+
+            JSONObject dex = jsonRoot.getJSONObject("dex");
+            dexPath = jsonRoot.getString("dir") + dex.getString("dexName");
+
+            className = dex.getString("className");
+            methodName = dex.getString("methodName");
+
+            JSONArray param_JSONArray = dex.getJSONArray("parameterTypes");
+            parameterTypes = new Class[param_JSONArray.length()];
+            for (int i = 0; i < param_JSONArray.length(); i++) {
+                parameterTypes[i] = Class.forName(param_JSONArray.getString(i));
+            }
+
+            JSONArray args_JSONArray = dex.getJSONArray("args");
+            args = new Object[]{args_JSONArray.length()};
+            for (int i = 0; i < args_JSONArray.length(); i++) {
+                args[i] = args_JSONArray.getString(i);
+            }
+
+            Object ret = loadDex(context, dexPath, className, methodName, parameterTypes, args);
+            Log.d(TAG, "ret:" + ret.toString());
+        } catch (JSONException | ClassNotFoundException e) {
+            e.printStackTrace();
+            Log.d(TAG, "Exception:" + e.getMessage());
+        }
+    }
 
     public Object loadDex(Context context, String dexPath, String className, String methodName, Class<?>[] parameterTypes, Object[] args) {
         Log.d(TAG, "load dex ...");
@@ -44,7 +99,7 @@ public class DexUtils {
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
                  InstantiationException | InvocationTargetException e) {
             e.printStackTrace();
-            Log.d(TAG, Objects.requireNonNull(e.getMessage()));
+            Log.d(TAG, "Exception:" + e.getMessage());
         }
         return null;
     }

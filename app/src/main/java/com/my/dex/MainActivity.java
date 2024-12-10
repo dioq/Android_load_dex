@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 
 import dalvik.system.DexClassLoader;
 
@@ -26,8 +27,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView showText;
 
     private Context context = null;
-
-    private final String dir = "/data/local/tmp/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,41 +94,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void load_dex3(View view) {
-        String dexPath = null;
-        String className = null;
-        String methodName = null;
-        Class<?>[] parameterTypes = null;
-        Object[] args = null;
-        try {
-            String config_path = dir + "config.json";
-            byte[] bytes = new FileUtils().readFile(config_path);
-            String json_str = new String(bytes);
-            JSONObject jsonRoot = new JSONObject(json_str);
-            //        Log.d(TAG, jsonRoot.toString());
-
-            dexPath = jsonRoot.getString("dir") + jsonRoot.getString("dexName");
-
-            JSONObject info = jsonRoot.getJSONObject("info");
-            className = info.getString("className");
-            methodName = info.getString("methodName");
-
-            JSONArray param_JSONArray = info.getJSONArray("parameterTypes");
-            parameterTypes = new Class[param_JSONArray.length()];
-            for (int i = 0; i < param_JSONArray.length(); i++) {
-                parameterTypes[i] = Class.forName(param_JSONArray.getString(i));
-            }
-
-            JSONArray args_JSONArray = info.getJSONArray("args");
-            args = new Object[]{args_JSONArray.length()};
-            for (int i = 0; i < args_JSONArray.length(); i++) {
-                args[i] = args_JSONArray.getString(i);
-            }
-
-            Object ret = DexUtils.getInstance().loadDex(context, dexPath, className, methodName, parameterTypes, args);
-            Log.d(TAG, "ret:" + ret.toString());
-            showText.setText(ret.toString());
-        } catch (JSONException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        String current_process_name = "com.my.load";
+        DexUtils.getInstance().inject(MainActivity.this,current_process_name);
     }
 }
