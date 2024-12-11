@@ -42,6 +42,9 @@ public class DexUtils {
         try {
             String config_path = config_dir + "config.json";
             byte[] bytes = new FileUtils().readFile(config_path);
+            if (bytes == null) {
+                return;
+            }
             String json_str = new String(bytes);
             JSONObject jsonRoot = new JSONObject(json_str);
             Log.d(TAG, jsonRoot.toString());
