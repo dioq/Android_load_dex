@@ -43,6 +43,7 @@ public class DexUtils {
             String config_path = config_dir + "config.json";
             byte[] bytes = new FileUtils().readFile(config_path);
             if (bytes == null) {
+                Log.d(TAG, config_path + " not exist!");
                 return;
             }
             String json_str = new String(bytes);
@@ -67,15 +68,19 @@ public class DexUtils {
             methodName = dex.getString("methodName");
 
             JSONArray param_JSONArray = dex.getJSONArray("parameterTypes");
-            parameterTypes = new Class[param_JSONArray.length()];
-            for (int i = 0; i < param_JSONArray.length(); i++) {
-                parameterTypes[i] = Class.forName(param_JSONArray.getString(i));
+            if (param_JSONArray.length() > 0) {
+                parameterTypes = new Class[param_JSONArray.length()];
+                for (int i = 0; i < param_JSONArray.length(); i++) {
+                    parameterTypes[i] = Class.forName(param_JSONArray.getString(i));
+                }
             }
 
             JSONArray args_JSONArray = dex.getJSONArray("args");
-            args = new Object[]{args_JSONArray.length()};
-            for (int i = 0; i < args_JSONArray.length(); i++) {
-                args[i] = args_JSONArray.getString(i);
+            if (args_JSONArray.length() > 0) {
+                args = new Object[]{args_JSONArray.length()};
+                for (int i = 0; i < args_JSONArray.length(); i++) {
+                    args[i] = args_JSONArray.getString(i);
+                }
             }
 
             Object ret = loadDex(context, dexPath, className, methodName, parameterTypes, args);
@@ -95,8 +100,18 @@ public class DexUtils {
         try {
             //该name就是dex_store_path路径下的dex文件里面的TestDexLoad这个类的包名+类名
             Class<?> clz = dexClassLoader.loadClass(className);
-            Method dexRes = clz.getMethod(methodName, parameterTypes);
-            Object obj = dexRes.invoke(clz.newInstance(), args);
+            Method dexRes = null;
+            if (parameterTypes == null) {
+                dexRes = clz.getMethod(methodName);
+            } else {
+                dexRes = clz.getMethod(methodName, parameterTypes);
+            }
+            Object obj = null;
+            if (args == null) {
+                obj = dexRes.invoke(clz.newInstance());
+            } else {
+                obj = dexRes.invoke(clz.newInstance(), args);
+            }
             Log.d(TAG, "function from dex was invoke ...");
             return obj;
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
