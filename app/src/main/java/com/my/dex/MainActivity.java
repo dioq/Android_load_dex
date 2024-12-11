@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void load_dex2(View view) throws ClassNotFoundException {
+    public void load_dex2(View view) {
         String dexName = "target.dex";
         // dex 文件的外部存储路径
         String dexPath = "/data/local/tmp/" + dexName;
@@ -83,18 +83,26 @@ public class MainActivity extends AppCompatActivity {
         String className = "cn.my.study.Test";
         String methodName = "getMsgFromDexFile";
 
-        Class<?> cls1 = Class.forName("java.lang.String");
-        Class<?>[] parameterTypes = new Class<?>[]{cls1};
+        Object ret = null;
+        try {
+            Class<?> cls1 = Class.forName("java.lang.String");
+            Class<?>[] parameterTypes = new Class<?>[]{cls1};
 
-        Object[] args = new Object[]{"AAAa"};
+            Object[] args = new Object[]{"AAAa"};
 
-        Object ret = DexUtils.getInstance().loadDex(context, dexPath, className, methodName, parameterTypes, args);
-        Log.d(TAG, "ret:" + ret.toString());
-        showText.setText(ret.toString());
+            ret = DexUtils.getInstance().loadDex(context, dexPath, className, methodName, parameterTypes, args);
+        } catch (ClassNotFoundException | NoSuchMethodException |
+                 IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        if (ret != null) {
+            Log.d(TAG, "ret:" + ret);
+            showText.setText(ret.toString());
+        }
     }
 
     public void load_dex3(View view) {
         String current_process_name = "com.my.load";
-        DexUtils.getInstance().inject(MainActivity.this,current_process_name);
+        DexUtils.getInstance().inject(MainActivity.this, current_process_name);
     }
 }

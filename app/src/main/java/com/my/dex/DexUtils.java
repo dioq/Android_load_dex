@@ -33,7 +33,7 @@ public class DexUtils {
     private final String config_dir = "/data/local/tmp/work/";
 
     public void inject(Context context, String packageName) {
-        Log.d(TAG, "inject dex ...");
+        Log.d(TAG, "inject dex to:" + packageName);
         String dexPath = null;
         String className = null;
         String methodName = null;
@@ -84,41 +84,39 @@ public class DexUtils {
             }
 
             Object ret = loadDex(context, dexPath, className, methodName, parameterTypes, args);
-            Log.d(TAG, "ret:" + ret.toString());
-        } catch (JSONException | ClassNotFoundException e) {
+            if (ret != null) {
+                Log.d(TAG, "loadDex return value:" + ret);
+            }
+        } catch (JSONException | ClassNotFoundException | NoSuchMethodException |
+                 IllegalAccessException | InstantiationException | InvocationTargetException e) {
             e.printStackTrace();
             Log.d(TAG, "Exception:" + e.getMessage());
         }
     }
 
-    public Object loadDex(Context context, String dexPath, String className, String methodName, Class<?>[] parameterTypes, Object[] args) {
-        Log.d(TAG, "load dex ...");
+    public Object loadDex(Context context, String dexPath, String className, String methodName, Class<?>[] parameterTypes, Object[] args) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException {
+        Log.d(TAG, "load dex:" + dexPath);
         File dexOutputDir = context.getDir("dex", 0);
         DexClassLoader dexClassLoader = new DexClassLoader(dexPath, dexOutputDir.getAbsolutePath(), null, context.getClassLoader());
 
         //调用 dex 文件里的 java方法
-        try {
-            //该name就是dex_store_path路径下的dex文件里面的TestDexLoad这个类的包名+类名
-            Class<?> clz = dexClassLoader.loadClass(className);
-            Method dexRes = null;
-            if (parameterTypes == null) {
-                dexRes = clz.getMethod(methodName);
-            } else {
-                dexRes = clz.getMethod(methodName, parameterTypes);
-            }
-            Object obj = null;
-            if (args == null) {
-                obj = dexRes.invoke(clz.newInstance());
-            } else {
-                obj = dexRes.invoke(clz.newInstance(), args);
-            }
-            Log.d(TAG, "function from dex was invoke ...");
-            return obj;
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
-                 InstantiationException | InvocationTargetException e) {
-            e.printStackTrace();
-            Log.d(TAG, "Exception:" + e.getMessage());
+        //该name就是dex_store_path路径下的dex文件里面的TestDexLoad这个类的包名+类名
+        Class<?> clz = dexClassLoader.loadClass(className);
+        Method dexRes = null;
+        if (parameterTypes == null) {
+            Log.d(TAG, "parameterTypes is null");
+            dexRes = clz.getMethod(methodName);
+        } else {
+            dexRes = clz.getMethod(methodName, parameterTypes);
         }
-        return null;
+        Object obj = null;
+        if (args == null) {
+            Log.d(TAG, "args is null");
+            obj = dexRes.invoke(clz.newInstance());
+        } else {
+            obj = dexRes.invoke(clz.newInstance(), args);
+        }
+        Log.d(TAG, "function from dex was invoke ...");
+        return obj;
     }
 }
