@@ -30,10 +30,10 @@ public class DexUtils {
     }
 
     private final String TAG = "dlog";
-    private final String config_dir = "/data/local/tmp/work/";
+    private final String config_dir = "/data/local/tmp/work2/";
 
     public void inject(Context context, String packageName) {
-        Log.d(TAG, "inject dex to:" + packageName);
+        Log.d(TAG, "inject dex ...");
         String dexPath = null;
         String className = null;
         String methodName = null;
@@ -41,7 +41,7 @@ public class DexUtils {
         Object[] args = null;
         try {
             String config_path = config_dir + "config.json";
-            byte[] bytes = new FileUtils().readFile(config_path);
+            byte[] bytes = FileUtils.getInstance().readFile(config_path);
             if (bytes == null) {
                 Log.d(TAG, config_path + " not exist!");
                 return;
@@ -50,19 +50,28 @@ public class DexUtils {
             JSONObject jsonRoot = new JSONObject(json_str);
             Log.d(TAG, jsonRoot.toString());
 
-            JSONArray target_pkgname = jsonRoot.getJSONArray("target_pkgname");
+            String dirPath = jsonRoot.getString("dir");
+
+            JSONArray target_pkgname = jsonRoot.getJSONArray("pkgname");
 //            for (int i = 0; i < target_pkgname.length(); i++) {
 //                Log.d(TAG, target_pkgname.getString(i));
 //            }
-
             boolean bool = target_pkgname.toString().contains(packageName);
             if (!bool) {
                 return;
             }
             Log.d(TAG, packageName + " exist!");
 
+            JSONArray files_jsonArray = jsonRoot.getJSONArray("files");
+            for (int i = 0; i < files_jsonArray.length(); i++) {
+                String srcPath = dirPath + files_jsonArray.getString(i);
+                String dstPath = context.getFilesDir().getPath() + "/" + files_jsonArray.getString(i);
+                FileUtils.getInstance().copyFile(srcPath, dstPath);
+            }
+
+
             JSONObject dex = jsonRoot.getJSONObject("dex");
-            dexPath = jsonRoot.getString("dir") + dex.getString("dexName");
+            dexPath = dirPath + dex.getString("dexName");
 
             className = dex.getString("className");
             methodName = dex.getString("methodName");
@@ -85,22 +94,22 @@ public class DexUtils {
 
             Object ret = loadDex(context, dexPath, className, methodName, parameterTypes, args);
             if (ret != null) {
-                Log.d(TAG, "loadDex return value:" + ret);
+                Log.d(TAG, "ret:" + ret);
             }
         } catch (JSONException | ClassNotFoundException | NoSuchMethodException |
                  IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            e.printStackTrace();
             Log.d(TAG, "Exception:" + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     public Object loadDex(Context context, String dexPath, String className, String methodName, Class<?>[] parameterTypes, Object[] args) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException {
-        Log.d(TAG, "load dex:" + dexPath);
+        Log.d(TAG, "load dex starting ...");
         File dexOutputDir = context.getDir("dex", 0);
-        DexClassLoader dexClassLoader = new DexClassLoader(dexPath, dexOutputDir.getAbsolutePath(), null, context.getClassLoader());
+        String lib_search_path = context.getFilesDir().getPath();
+        DexClassLoader dexClassLoader = new DexClassLoader(dexPath, dexOutputDir.getAbsolutePath(), lib_search_path, context.getClassLoader());
 
         //调用 dex 文件里的 java方法
-        //该name就是dex_store_path路径下的dex文件里面的TestDexLoad这个类的包名+类名
         Class<?> clz = dexClassLoader.loadClass(className);
         Method dexRes = null;
         if (parameterTypes == null) {
@@ -116,7 +125,7 @@ public class DexUtils {
         } else {
             obj = dexRes.invoke(clz.newInstance(), args);
         }
-        Log.d(TAG, "function from dex was invoke ...");
+        Log.d(TAG, "load dex end!");
         return obj;
     }
 }
